@@ -1,5 +1,3 @@
-from util import DNAString
-
 start_pos = 328 * 3
 fin_pos = 529 * 3
 
