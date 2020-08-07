@@ -1,6 +1,5 @@
-from model.mutation import Mutation
+from typing import List, Tuple
 
-# Nucleotides to amino acids
 translate_table = {
     'ATA': 'I', 'ATC': 'I', 'ATT': 'I', 'ATG': 'M',
     'ACA': 'T', 'ACC': 'T', 'ACG': 'T', 'ACT': 'T',
@@ -21,9 +20,13 @@ translate_table = {
 }
 
 
-# Apply transformation from nucleotide sequence to amino sequence
-# Expects the parameter to be a valid protein extracted from the DNA
-def to_amino(seq: str):
+def to_amino(seq: str) -> str:
+    """
+    Apply transformation from nucleotide sequence to amino sequence.
+
+    :param seq: nucleotide sequence
+    :return: amino acids sequence
+    """
     if len(seq) % 3 != 0:
         seq = seq[:-(len(seq) % 3)]
     amino_seq = []
@@ -33,27 +36,41 @@ def to_amino(seq: str):
     return ''.join(amino_seq)
 
 
-# Generate the protein resulted by applying a single substitution mutation on the given sequence
-def apply_mutation(sequence: str, mutation: Mutation):
-    if mutation.position > len(sequence):
-        raise Exception('Position out of range')
-    if sequence[mutation.position - 1] != mutation.original:
-        raise Exception('Invalid base sequence')
+def parse_mutation(code: str) -> Tuple[int, str, str]:
+    """
+    Split mutation code into components.
 
-    ls = list(sequence)
-    ls[mutation.position - 1] = mutation.actual
-    return ''.join(ls)
+    :param code: encoded mutation
+    :return: tuple containing position, original amino acid and actual amino acid
+    """
+    if len(code) < 3:
+        raise Exception('Invalid code')
+
+    original = code[0]
+    actual = code[-1]
+    try:
+        position = int(code[1:-1])
+    except ValueError:
+        raise Exception('Invalid code')
+
+    return position, original, actual
 
 
-# This is only efficient for substitution mutations
-# Insertion and deletion mutations should be analyzed at nucleotide level
-def find_mutations(base: str, seq: str):
-    size = len(base)
+def find_substitution_mutations(ref: str, seq: str) -> List[str]:
+    """
+    Find substitution mutations, assuming there are no insertions or deletions.
+    For detecting ins/del, a comparison on nucleotide level should be performed.
+
+    :param ref: reference sequence
+    :param seq: actual sequence
+    :return:
+    """
+    size = len(ref)
     if len(seq) != size:
         raise Exception('Sizes do not match')
 
     mutations = []
     for i in range(size):
-        if base[i] != seq[i]:
-            mutations.append(Mutation(i + 1, base[i], seq[i]))
+        if ref[i] != seq[i]:
+            mutations.append(ref[i] + str(i + 1) + seq[i])
     return mutations

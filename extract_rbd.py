@@ -1,58 +1,65 @@
-start_pos = 328 * 3
-fin_pos = 529 * 3
+import sys
 
-refRbd = next(DNAString.read_fasta('Refrence_RBD.fasta'))
+from extract_spike import extract_spike_from_sequence
+from util.algorithms import lev_distance
+from util.fasta_utils import read_sequences, to_fasta
 
-total_mutations = 0
 
-with open("rbds.fasta", 'w') as f:
-    f.write("")
+def extract_rbd_from_spike(ref_rbd: str, seq_spike: str) -> str:
+    """
+    Extract Receptor-Binding Domain from a spike.
 
-for seq in DNAString.read_fasta("spikes.fasta"):
-    # seq.translate()
-    seq.code = seq.code.upper()
+    :param ref_rbd: reference RBD
+    :param seq_spike: sample sequence
+    :return: RBD of the sample
+    """
+    min_diff = len(ref_rbd) + 100
+    cut_start = 0
 
-    min_sim = len(refRbd) + 100
-    min_sim_pos = 0
+    for i in range(start_pos, fin_pos - len(ref_rbd)):
+        rbd_candidate = seq_spike[i:i + len(ref_rbd)]
 
-    for i in range(start_pos, fin_pos - len(refRbd)):
-        possible_rbd = DNAString.DNAString()
-        possible_rbd.code = seq.code[i: i + len(refRbd)]
+        diff = lev_distance(rbd_candidate, ref_rbd)
 
-        sim = DNAString.similarity(possible_rbd, refRbd)
+        if diff < min_diff:
+            min_diff = diff
+            cut_start = i
 
-        if sim < min_sim:
-            min_sim = sim
-            min_sim_pos = i
-        elif sim == min_sim:
-            print(seq.header)
+    min_diff = len(ref_rbd) + 100
+    cut_end = 0
 
-    cut_start = min_sim_pos
+    for i in range(fin_pos, start_pos + len(ref_rbd), -1):
+        rbd_candidate = seq_spike[i - len(ref_rbd):i]
 
-    min_sim = len(refRbd) + 100
-    min_sim_pos = 0
+        diff = lev_distance(rbd_candidate, ref_rbd)
 
-    for i in range(fin_pos, start_pos + len(refRbd), -1):
-        possible_rbd = DNAString.DNAString()
-        possible_rbd.code = seq.code[i - len(refRbd): i]
+        if diff < min_diff:
+            min_diff = diff
+            cut_end = i
 
-        sim = DNAString.similarity(possible_rbd, refRbd)
+    return seq_spike[cut_start:cut_end]
 
-        if sim < min_sim:
-            min_sim = sim
-            min_sim_pos = i
-        elif sim == min_sim:
-            print(seq.header)
 
-    cut_fin = min_sim_pos
+if __name__ == '__main__':
+    reference_path = sys.argv[1]
+    samples_path = sys.argv[2]
+    output_path = sys.argv[3]
 
-    cut_rbd = DNAString.DNAString()
-    cut_rbd.code = seq.code[cut_start: cut_fin]
-    cut_rbd.set_header(seq.header)
+    reference_rbd = next(read_sequences(reference_path))[0]
 
-    cut_rbd.write("rbds.fasta")
-    final_similarity = DNAString.similarity(refRbd, cut_rbd)
-    total_mutations += final_similarity
-    print("{}: {} - {} {}".format(cut_rbd.header, cut_start, cut_fin, final_similarity))
+    start_pos = 328 * 3
+    fin_pos = 529 * 3
 
-print("Total number of mutations: {}".format(total_mutations))
+    total_mutations = 0
+
+    with open(output_path, 'w') as f:
+        for header, seq in read_sequences(samples_path):
+            spike = extract_spike_from_sequence(seq)
+            rbd = extract_rbd_from_spike(reference_rbd, spike)
+            f.write(to_fasta(header, rbd))
+
+            edit_distance = lev_distance(reference_rbd, rbd)
+            total_mutations += edit_distance
+            print("{}: {} mutation(s)".format(header, edit_distance))
+
+        print("Total number of mutations: {}".format(total_mutations))
