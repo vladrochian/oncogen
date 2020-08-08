@@ -18,7 +18,7 @@ with open(output_file, 'w') as f:
         total_seq += 1
         spike = extract_spike(seq)
         if total_seq % 100 == 0:
-            print('{} processed sequences'.format(total_seq), flush=True)
+            print('{} processed sequences'.format(total_seq))
         if len(ref_spike) != len(spike) and 20 < len(spike) < 2 * len(ref_spike) and spike.find('N') == -1:
             useful_seq += 1
             f.write(header + '\n' + generate_diff(ref_spike, spike))
