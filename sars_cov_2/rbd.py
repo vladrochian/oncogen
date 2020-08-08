@@ -1,8 +1,8 @@
 import sys
 
-from extract_spike import extract_spike_from_sequence
+from sars_cov_2.spike import extract_spike_as_amino
 from util.algorithms import lev_distance
-from util.fasta_utils import read_sequences, to_fasta
+from util.fasta_utils import *
 
 
 def extract_rbd_from_spike(ref_rbd: str, seq_spike: str) -> str:
@@ -45,7 +45,7 @@ if __name__ == '__main__':
     samples_path = sys.argv[2]
     output_path = sys.argv[3]
 
-    reference_rbd = next(read_sequences(reference_path))[0]
+    reference_rbd = read_single_sequence(reference_path)
 
     start_pos = 328 * 3
     fin_pos = 529 * 3
@@ -54,7 +54,7 @@ if __name__ == '__main__':
 
     with open(output_path, 'w') as f:
         for header, seq in read_sequences(samples_path):
-            spike = extract_spike_from_sequence(seq)
+            spike = extract_spike_as_amino(seq)
             rbd = extract_rbd_from_spike(reference_rbd, spike)
             f.write(to_fasta(header, rbd))
 

@@ -24,6 +24,16 @@ def read_sequences(input_path: str):
             yield header, seq_buffer
 
 
+def read_single_sequence(input_path: str):
+    """
+    Retrieve single sequence from a fasta file.
+
+    :param input_path:
+    :return: first sequence from the file
+    """
+    return next(read_sequences(input_path))[1]
+
+
 def to_fasta(header: str, seq: str, split_at=0) -> str:
     """
     Transform sequence sample into fasta format.

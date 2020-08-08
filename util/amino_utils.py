@@ -65,12 +65,8 @@ def find_substitution_mutations(ref: str, seq: str) -> List[str]:
     :param seq: actual sequence
     :return:
     """
-    size = len(ref)
-    if len(seq) != size:
-        raise Exception('Sizes do not match')
-
     mutations = []
-    for i in range(size):
+    for i in range(min(len(ref), len(seq))):
         if ref[i] != seq[i]:
             mutations.append(ref[i] + str(i + 1) + seq[i])
     return mutations

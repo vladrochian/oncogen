@@ -2,3 +2,6 @@
 venv
 
 **/*.fasta
+**/data/*.*
+
+!sars_cov_2/data/reference-spike.fasta
