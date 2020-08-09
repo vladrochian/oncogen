@@ -67,6 +67,6 @@ def find_substitution_mutations(ref: str, seq: str) -> List[str]:
     """
     mutations = []
     for i in range(min(len(ref), len(seq))):
-        if ref[i] != seq[i]:
+        if ref[i] != seq[i] and seq[i] != '!':
             mutations.append(ref[i] + str(i + 1) + seq[i])
     return mutations
