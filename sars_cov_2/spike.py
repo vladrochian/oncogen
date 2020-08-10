@@ -1,8 +1,53 @@
 import sys
 
-from util.algorithms import extract_first_match
+from util.algorithms import extract_first_match, lev_distance
 from util.amino_utils import to_amino
 from util.fasta_utils import read_sequences, to_fasta
+
+
+def extract_best_matching_spike(ref_spike: str, seq: str, interval: tuple) -> str:
+    """
+    Extract spike protein from full sequence by finding
+    best matching subsequnce.
+
+    :param ref_spike: spike refrence
+    :param seq: initial sequence
+    :param interval: the range in which the spike is found
+    :return: spike as a sequence of nucleotides
+    """
+
+    # Dummy implementation:
+    cache = {}
+
+    min_dist = len(ref_spike) + 100
+    cut_start = 0
+
+    for i in range(interval[0], interval[1] - len(ref_spike)):
+        spike_candidate = seq[i: i + len(ref_spike)]
+        
+        dist = lev_distance(ref_spike, spike_candidate)
+        cache[i] = dist
+
+        if dist < min_dist:
+            min_dist = dist
+            cut_start = i
+      
+    min_dist = len(ref_spike) + 100
+    cut_fin = 0
+
+    for i in range(interval[1], interval[0] + len(ref_spike), -1):
+        spike_candidate = seq[i - len(ref_spike): i]
+        
+        if (i - len(ref_spike)) in cache:
+            dist = i - len(ref_spike)
+        else:
+            dist = lev_distance(ref_spike, spike_candidate)
+
+        if dist < min_dist:
+            min_dist = dist
+            cut_fin = i
+    
+    return seq[cut_start: cut_fin]
 
 
 def extract_spike(seq: str) -> str:
