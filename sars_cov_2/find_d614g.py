@@ -1,5 +1,7 @@
 import re
 import sys
+import matplotlib.pyplot as plt
+from matplotlib.ticker import PercentFormatter
 
 from sars_cov_2.spike import extract_spike_as_amino
 from util.amino_utils import find_substitution_mutations, to_amino
@@ -19,9 +21,26 @@ def get_month(text: str) -> str:
     return None if res is None else res.group()
 
 
+def build_statistics(freq_map):
+    months = list(freq_map.keys())
+    months.sort()
+    percents = []
+    for month in months:
+        t, m = monthly_stats[month]
+        percents.append(m / t)
+        print('{} - {} out of {} ({:.2%})'.format(month, m, t, m / t))
+
+    plt.bar(months, percents)
+    plt.xlabel('Month')
+    plt.ylabel('D614G frequency')
+    plt.gca().yaxis.set_major_formatter(PercentFormatter(1))
+    plt.show()
+
+
 total_count = 0
 mutated_count = 0
 monthly_stats = {}
+
 
 with open(output_file, 'w') as f:
     for header, seq in read_sequences(input_file):
@@ -49,8 +68,5 @@ with open(output_file, 'w') as f:
 
     print('Total: {}\nMutated: {}'.format(total_count, mutated_count))
 
-    months = list(monthly_stats.keys())
-    months.sort()
-    for month in months:
-        t, m = monthly_stats[month]
-        print('{} - {} out of {} ({:.2%})'.format(month, m, t, m / t))
+    build_statistics(monthly_stats)
+
