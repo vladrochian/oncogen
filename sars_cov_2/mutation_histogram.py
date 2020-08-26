@@ -5,7 +5,7 @@ from typing import List
 import matplotlib.pyplot as plt
 from matplotlib.ticker import PercentFormatter
 
-from sars_cov_2.get_substitution_mutations import get_substitution_mutations
+from sars_cov_2.substitution_mutations import get_substitution_mutations
 from sars_cov_2.spike import get_reference_as_amino
 
 
