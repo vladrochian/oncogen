@@ -1,14 +1,13 @@
 import sys
 
-from sars_cov_2.spike import extract_spike
-from util.algorithms import generate_diff, lev_distance_optimized
+from sars_cov_2.spike import extract_spike, get_reference_spike
+from util.algorithms import lev_distance_optimized
 from util.fasta_utils import *
 
-reference_file = sys.argv[1]
-input_file = sys.argv[2]
-output_file = sys.argv[3]
+input_file = sys.argv[1]
+output_file = sys.argv[2]
 
-ref_spike = read_single_sequence(reference_file)
+ref_spike = get_reference_spike()
 max_mutations = 40
 
 with open(output_file, 'w') as f:

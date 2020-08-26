@@ -2,7 +2,26 @@ import sys
 
 from util.algorithms import extract_first_match
 from util.amino_utils import to_amino
-from util.fasta_utils import read_sequences, to_fasta
+from util.fasta_utils import read_sequences, to_fasta, read_single_sequence
+
+
+def get_reference_spike() -> str:
+    """
+    Get the reference spike from the local file.
+
+    :return: reference spike as a sequence of nucleotides
+    """
+    ref_file = 'data/reference-spike.fasta'
+    return read_single_sequence(ref_file)
+
+
+def get_reference_as_amino() -> str:
+    """
+    Get the reference spike from the local file, converted to amino acids.
+
+    :return: reference spike as a sequence of amino acids
+    """
+    return to_amino(get_reference_spike())
 
 
 def extract_spike(seq: str) -> str:

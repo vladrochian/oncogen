@@ -50,9 +50,9 @@ def lev_distance_optimized(s1: str, s2: str, upper_bound: int, ignore_n=False) -
     """
     Levenshtein distance between two sequences, optimized.
 
-    Time complexity: |s1|
+    Time complexity: |s1| * upper_bound
 
-    Memory complexity: 1
+    Memory complexity: upper_bound
 
     :param s1: first sequence
     :param s2: second sequence
@@ -140,3 +140,61 @@ def generate_diff(s1: str, s2: str, ignore_n=False) -> str:
     second_line.reverse()
     third_line.reverse()
     return '\n'.join([''.join(first_line), ''.join(second_line), ''.join(third_line)]) + '\n'
+
+
+def generate_diff_optimized(s1: str, s2: str, upper_bound: int, ignore_n=False) -> str:
+    return generate_diff(s1, s2, ignore_n)
+    # """
+    # Generate graphically aligned strings with highlighted differences (optimized).
+    #
+    # Time complexity: |s1| * upper_bound
+    #
+    # Memory complexity: |s1| * upper_bound
+    #
+    # :param s1:
+    # :param s2:
+    # :param upper_bound: maximum estimated value of the difference
+    # :param ignore_n: if true, the function will ignore differences given by letter N in the sequences
+    # :return: printable representation of differences
+    # """
+    # best = [[0 for _ in range(len(s2) + 1)] for _ in range(len(s1) + 1)]
+    # prv = [[(0, 0) for _ in range(len(s2) + 1)] for _ in range(len(s1) + 1)]
+    # for i in range(len(s2) + 1):
+    #     best[0][i] = i
+    #     prv[0][i] = 0, i - 1
+    # for i in range(1, len(s1) + 1):
+    #     best[i][0] = i
+    #     prv[i][0] = i - 1, 0
+    #     for j in range(1, len(s2) + 1):
+    #         best[i][j] = best[i - 1][j - 1] + char_dist(s1[i - 1], s2[j - 1], ignore_n)
+    #         prv[i][j] = i - 1, j - 1
+    #         if best[i - 1][j] + 1 < best[i][j]:
+    #             best[i][j] = best[i - 1][j] + 1
+    #             prv[i][j] = i - 1, j
+    #         if best[i][j - 1] + 1 < best[i][j]:
+    #             best[i][j] = best[i][j - 1] + 1
+    #             prv[i][j] = i, j - 1
+    # first_line = []
+    # second_line = []
+    # third_line = []
+    # i = len(s1)
+    # j = len(s2)
+    # while i > 0 or j > 0:
+    #     prv_i, prv_j = prv[i][j]
+    #     if prv_i == i - 1 and prv_j == j - 1:
+    #         first_line.append(' ' if char_dist(s1[i - 1], s2[j - 1], ignore_n) == 0 else 'v')
+    #         second_line.append(s1[i - 1])
+    #         third_line.append(s2[j - 1])
+    #     elif prv_i == i - 1:
+    #         first_line.append('*')
+    #         second_line.append(s1[i - 1])
+    #         third_line.append(' ')
+    #     else:
+    #         first_line.append('*')
+    #         second_line.append(' ')
+    #         third_line.append(s2[j - 1])
+    #     i, j = prv_i, prv_j
+    # first_line.reverse()
+    # second_line.reverse()
+    # third_line.reverse()
+    # return '\n'.join([''.join(first_line), ''.join(second_line), ''.join(third_line)]) + '\n'
