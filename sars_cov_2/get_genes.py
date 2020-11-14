@@ -34,7 +34,7 @@ def get_reference_genes(patterns: Optional[Dict[str, GenePattern]] = None) -> Di
 
 
 def extract_mutations_per_gene_per_sequence(
-        input_file: str, output_file: str, patterns: Optional[Dict[str, GenePattern]] = None
+        input_file: str, output_file: str, amino=False, patterns: Optional[Dict[str, GenePattern]] = None
 ) -> None:
     if patterns is None:
         patterns = get_sars_cov_2_gene_patterns()
@@ -42,7 +42,7 @@ def extract_mutations_per_gene_per_sequence(
     with open(output_file, 'w') as f:
         for header, seq in read_sequences(input_file):
             genes = get_genes(seq, patterns)
-            mutations = get_substitution_mutations_per_gene(ref_genes, genes)
+            mutations = get_substitution_mutations_per_gene(ref_genes, genes, amino)
             f.write(header + '\n')
             for gene, mutation_list in mutations.items():
                 len_diff = len(genes[gene]) - len(ref_genes[gene])
@@ -57,4 +57,4 @@ def extract_mutations_per_gene_per_sequence(
 if __name__ == '__main__':
     input_path = 'data/romania.fasta'
     output_path = 'data/romania-all-mutations.txt'
-    extract_mutations_per_gene_per_sequence(input_path, output_path)
+    extract_mutations_per_gene_per_sequence(input_path, output_path, True)

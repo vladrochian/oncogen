@@ -1,5 +1,7 @@
 from typing import Optional, Dict, List
 
+from util.amino_utils import to_amino
+
 
 class GeneDetails:
     def __init__(self, start: int, sequence: str):
@@ -39,21 +41,24 @@ def get_genes(seq: str, patterns: Dict[str, GenePattern]) -> Dict[str, GeneDetai
     return ans
 
 
-def get_substitution_mutations(ref_gene: GeneDetails, gene: GeneDetails) -> List[str]:
+def get_substitution_mutations(ref_gene: GeneDetails, gene: GeneDetails, amino=False) -> List[str]:
+    r_seq = to_amino(ref_gene.sequence) if amino else ref_gene.sequence
+    m_seq = to_amino(gene.sequence) if amino else gene.sequence
+    unknown = '!' if amino else 'N'
     mutations = []
-    for i in range(min(len(ref_gene), len(gene))):
-        if ref_gene[i] != gene[i] and ref_gene[i] != 'N' and gene[i] != 'N':
-            mutations.append(ref_gene[i] + str(i + ref_gene.start) + gene[i])
+    for i in range(min(len(r_seq), len(m_seq))):
+        if r_seq[i] != m_seq[i] and r_seq[i] != unknown and m_seq[i] != unknown:
+            mutations.append(r_seq[i] + str(i + (1 if amino else ref_gene.start)) + m_seq[i])
     return mutations
 
 
 def get_substitution_mutations_per_gene(
-        ref_genes: Dict[str, GeneDetails], genes: Dict[str, GeneDetails]
+        ref_genes: Dict[str, GeneDetails], genes: Dict[str, GeneDetails], amino=False
 ) -> Dict[str, List[str]]:
     ans = {}
     for gene in genes:
         if gene in ref_genes:
-            ans[gene] = get_substitution_mutations(ref_genes[gene], genes[gene])
+            ans[gene] = get_substitution_mutations(ref_genes[gene], genes[gene], amino)
     return ans
 
 
