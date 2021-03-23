@@ -8,17 +8,16 @@ from util.gene_utils import GeneDetails, get_all_mutations
 def get_all_spike_mutations(ref_spike: GeneDetails, input_file: str):
     for header, seq in read_sequences(input_file):
         spike = extract_spike(seq)
-        mutations = None if len(spike) > len(ref_spike) + 100 else get_all_mutations(ref_spike, spike)
+        mutations = None if spike is None or len(spike) > len(ref_spike) + 100 else get_all_mutations(ref_spike, spike)
         yield header, mutations
 
 
 def print_all_spike_mutations(ref_spike: GeneDetails, input_file: str, output_file: str):
     with open(output_file, 'w') as f:
         for header, mutations in get_all_spike_mutations(ref_spike, input_file):
-            print(header)
             text = '--- Manual investigation needed ---' if mutations is None else ', '.join(mutations)
+            print(header + '\n' + text + '\n')
             f.write(header + '\n' + text + '\n')
-            break
 
 
 if __name__ == '__main__':

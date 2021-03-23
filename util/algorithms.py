@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 
 
 def extract_first_match(s: str, starts_with: str, ends_with: str, search_from=1) -> str:
@@ -163,6 +163,8 @@ def get_list_of_differences_optimized(s1: str, s2: str, upper_bound: int, ignore
             return None
         for j in range(end, 2 * upper_bound + 1):
             best[i & 1][j] = inf
+    if best[len(s1) & 1][len(s2) - len(s1) + upper_bound] > upper_bound:
+        return None
     col = [0 for _ in range(len(s1) + 1)]
     x, y = len(s1), len(s2) - len(s1) + upper_bound
     while x > 0 or y > upper_bound:
@@ -170,6 +172,18 @@ def get_list_of_differences_optimized(s1: str, s2: str, upper_bound: int, ignore
         x, y = prev[x][y]
     col[0] = 0
     return get_differences_from_row_points(s1, s2, col, ignore_n)
+
+
+def get_list_of_differences_adaptable(s1: str, s2: str, upper_bound_range: Tuple[int, int], ignore_n=False,
+                                      try_brute=True):
+    current_upper_bound = upper_bound_range[0]
+    ans = None
+    while ans is None and current_upper_bound <= upper_bound_range[1]:
+        ans = get_list_of_differences_optimized(s1, s2, current_upper_bound, ignore_n)
+        current_upper_bound *= 2
+    if ans is None and try_brute:
+        ans = get_list_of_differences(s1, s2, ignore_n)
+    return ans
 
 
 def generate_diff(s1: str, s2: str, ignore_n=False) -> str:

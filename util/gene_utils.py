@@ -1,6 +1,6 @@
 from typing import Optional, Dict, List
 
-from util.algorithms import get_list_of_differences
+from util.algorithms import get_list_of_differences, get_list_of_differences_adaptable
 from util.amino_utils import to_amino
 
 
@@ -56,8 +56,8 @@ def get_mutation_name(diff_obj, shift_by=0) -> str:
     return ''
 
 
-def get_all_mutations(ref_gene: GeneDetails, gene: GeneDetails) -> List[str]:
-    differences = get_list_of_differences(ref_gene.sequence, gene.sequence, True)
+def get_all_mutations(ref_gene: GeneDetails, gene: GeneDetails, upper_bound_range=(8, 256)) -> List[str]:
+    differences = get_list_of_differences_adaptable(ref_gene.sequence, gene.sequence, upper_bound_range, True)
     return [get_mutation_name(d, ref_gene.start - 1) for d in differences]
 
 
