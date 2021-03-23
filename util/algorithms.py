@@ -174,8 +174,8 @@ def get_list_of_differences_optimized(s1: str, s2: str, upper_bound: int, ignore
     return get_differences_from_row_points(s1, s2, col, ignore_n)
 
 
-def get_list_of_differences_adaptable(s1: str, s2: str, upper_bound_range: Tuple[int, int], ignore_n=False,
-                                      try_brute=True):
+def get_list_of_differences_adaptive(s1: str, s2: str, upper_bound_range: Tuple[int, int], ignore_n=False,
+                                     try_brute=True):
     current_upper_bound = upper_bound_range[0]
     ans = None
     while ans is None and current_upper_bound <= upper_bound_range[1]:
