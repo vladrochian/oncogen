@@ -1,5 +1,6 @@
 from typing import Optional, Dict, List
 
+from util.algorithms import get_list_of_differences
 from util.amino_utils import to_amino
 
 
@@ -32,12 +33,41 @@ class GenePattern:
         return GeneDetails(start_pos + 1, suffix[:end_pos + len(self.suffix)])
 
 
+def get_gene(seq: str, patterns: Dict[str, GenePattern], gene_name: str) -> Optional[GeneDetails]:
+    return patterns[gene_name].extract_from(seq) if gene_name in patterns else None
+
+
 def get_genes(seq: str, patterns: Dict[str, GenePattern]) -> Dict[str, GeneDetails]:
     ans = {}
     for gene, pattern in patterns.items():
         gene_seq = pattern.extract_from(seq)
         if gene_seq is not None:
             ans[gene] = gene_seq
+    return ans
+
+
+def get_mutation_name(diff_obj, shift_by=0) -> str:
+    if diff_obj[0] == 'S':
+        return '{}{}{}'.format(diff_obj[2], diff_obj[1] + shift_by, diff_obj[3])
+    if diff_obj[0] == 'I':
+        return '{}_{}ins{}'.format(diff_obj[1] + shift_by - 1, diff_obj[1] + shift_by, diff_obj[2])
+    if diff_obj[0] == 'D':
+        return '{}{}del'.format(diff_obj[2], diff_obj[1] + shift_by)
+    return ''
+
+
+def get_all_mutations(ref_gene: GeneDetails, gene: GeneDetails) -> List[str]:
+    differences = get_list_of_differences(ref_gene.sequence, gene.sequence, True)
+    return [get_mutation_name(d, ref_gene.start - 1) for d in differences]
+
+
+def get_all_mutations_per_gene(
+        ref_genes: Dict[str, GeneDetails], genes: Dict[str, GeneDetails]
+) -> Dict[str, List[str]]:
+    ans = {}
+    for gene in genes:
+        if gene in ref_genes:
+            ans[gene] = get_all_mutations(ref_genes[gene], genes[gene])
     return ans
 
 

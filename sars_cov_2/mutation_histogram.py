@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import PercentFormatter
 
 from sars_cov_2.substitution_mutations import get_substitution_mutations
-from sars_cov_2.spike import get_reference_as_amino
+from sars_cov_2.structure import get_reference_as_amino
 
 
 def get_month(header: str) -> str:

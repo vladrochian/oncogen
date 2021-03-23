@@ -1,6 +1,6 @@
 import sys
 
-from sars_cov_2.spike import extract_spike_as_amino
+from sars_cov_2.structure import extract_spike_as_amino
 from util.algorithms import lev_distance
 from util.fasta_utils import *
 

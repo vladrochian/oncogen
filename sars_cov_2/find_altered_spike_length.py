@@ -1,13 +1,13 @@
 import sys
 
-from sars_cov_2.spike import extract_spike, get_reference_spike
+from sars_cov_2.structure import extract_spike_seq, get_reference_spike_seq
 from util.algorithms import lev_distance_optimized
 from util.fasta_utils import *
 
 input_file = sys.argv[1]
 output_file = sys.argv[2]
 
-ref_spike = get_reference_spike()
+ref_spike = get_reference_spike_seq()
 max_mutations = 40
 
 with open(output_file, 'w') as f:
@@ -17,7 +17,7 @@ with open(output_file, 'w') as f:
     dif_max = 0
     for header, seq in read_sequences(input_file):
         total_seq += 1
-        spike = extract_spike(seq)
+        spike = extract_spike_seq(seq)
         if total_seq % 200 == 0:
             print('{} processed sequences'.format(total_seq))
         dif = abs(len(ref_spike) - len(spike))

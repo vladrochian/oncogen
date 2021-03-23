@@ -1,7 +1,7 @@
 import sys
 
 from sars_cov_2.mutation_histogram import build_mutation_histogram
-from sars_cov_2.spike import get_reference_as_amino
+from sars_cov_2.structure import get_reference_as_amino
 from sars_cov_2.substitution_mutations import get_most_frequent_substitution_mutations
 
 input_path = sys.argv[1]

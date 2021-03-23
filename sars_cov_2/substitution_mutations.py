@@ -1,6 +1,6 @@
 import sys
 
-from sars_cov_2.spike import extract_spike_as_amino, get_reference_as_amino
+from sars_cov_2.structure import extract_spike_as_amino, get_reference_as_amino
 from util.amino_utils import find_substitution_mutations
 from util.fasta_utils import *
 
@@ -17,11 +17,13 @@ def get_substitution_mutations(ref_spike: str, input_file: str):
     """
     for header, seq in read_sequences(input_file):
         spike = extract_spike_as_amino(seq)
-        if len(spike) == len(ref_spike):
+        mutations = None
+        if spike is not None and len(spike) == len(ref_spike):
             mutations = find_substitution_mutations(ref_spike, spike)
             # We assume that if there are too many substitutions detected, it's due to a frame shift
-            if len(mutations) < 20:
-                yield header, mutations
+            if len(mutations) > 50:
+                mutations = None
+        yield header, mutations
 
 
 def print_substitution_mutations(ref_spike: str, input_file: str, output_file: str):
@@ -34,7 +36,8 @@ def print_substitution_mutations(ref_spike: str, input_file: str, output_file: s
     """
     with open(output_file, 'w') as f:
         for header, mutations in get_substitution_mutations(ref_spike, input_file):
-            f.write(header + '\n' + ', '.join(mutations) + '\n')
+            text = '--- Manual investigation needed ---' if mutations is None else ', '.join(mutations)
+            f.write(header + '\n' + text + '\n')
 
 
 def get_substitution_mutations_count(ref_spike: str, input_file: str):
