@@ -1,3 +1,6 @@
+from typing import List
+
+
 def extract_first_match(s: str, starts_with: str, ends_with: str, search_from=1) -> str:
     """
     Return first substring that starts and ends with given sequences
@@ -107,13 +110,7 @@ def generate_best_and_prev(s1: str, s2: str, ignore_n=False):
     return best, prev
 
 
-def get_list_of_differences(s1: str, s2: str, ignore_n=False):
-    best, prev = generate_best_and_prev(s1, s2, ignore_n)
-    col = [0 for _ in range(len(s1) + 1)]
-    x, y = len(s1), len(s2)
-    while x > 0 and y > 0:
-        col[x] = y
-        x, y = prev[x][y]
+def get_differences_from_row_points(s1: str, s2: str, col: List[int], ignore_n=False):
     ans = []
     for i in range(1, len(s1) + 1):
         if col[i] == col[i - 1]:
@@ -124,6 +121,55 @@ def get_list_of_differences(s1: str, s2: str, ignore_n=False):
             if char_dist(s1[i - 1], s2[col[i] - 1], ignore_n) == 1:
                 ans.append(('S', i, s1[i - 1], s2[col[i] - 1]))
     return ans
+
+
+def get_list_of_differences(s1: str, s2: str, ignore_n=False):
+    best, prev = generate_best_and_prev(s1, s2, ignore_n)
+    col = [0 for _ in range(len(s1) + 1)]
+    x, y = len(s1), len(s2)
+    while x > 0 or y > 0:
+        col[x] = y
+        x, y = prev[x][y]
+    col[0] = 0
+    return get_differences_from_row_points(s1, s2, col, ignore_n)
+
+
+def get_list_of_differences_optimized(s1: str, s2: str, upper_bound: int, ignore_n=False):
+    inf = 2 * upper_bound
+    best = [[0 for _ in range(2 * upper_bound + 1)] for _ in range(2)]
+    prev = [[(0, 0) for _ in range(2 * upper_bound + 1)] for _ in range(len(s1) + 1)]
+    for i in range(upper_bound):
+        best[0][i] = inf
+    for i in range(upper_bound + 1):
+        best[0][i + upper_bound] = i
+    for i in range(1, len(s1) + 1):
+        flag = False
+        start = max(0, upper_bound - i)
+        end = min(2 * upper_bound + 1, upper_bound + len(s2) - i + 1)
+        for j in range(start):
+            best[i & 1][j] = inf
+        for j in range(start, end):
+            best[i & 1][j] = best[(i & 1) ^ 1][j] + char_dist(s1[i - 1], s2[j + i - upper_bound - 1], ignore_n)
+            prev[i][j] = i - 1, j
+            if j < 2 * upper_bound and best[(i & 1) ^ 1][j + 1] + 1 < best[i & 1][j]:
+                best[i & 1][j] = best[(i & 1) ^ 1][j + 1] + 1
+                prev[i][j] = i - 1, j + 1
+            if j > 0 and best[i & 1][j - 1] + 1 < best[i & 1][j]:
+                best[i & 1][j] = best[i & 1][j - 1] + 1
+                prev[i][j] = i, j - 1
+            if best[i & 1][j] <= upper_bound:
+                flag = True
+        if not flag:
+            return None
+        for j in range(end, 2 * upper_bound + 1):
+            best[i & 1][j] = inf
+    col = [0 for _ in range(len(s1) + 1)]
+    x, y = len(s1), len(s2) - len(s1) + upper_bound
+    while x > 0 or y > upper_bound:
+        col[x] = y - upper_bound + x
+        x, y = prev[x][y]
+    col[0] = 0
+    return get_differences_from_row_points(s1, s2, col, ignore_n)
 
 
 def generate_diff(s1: str, s2: str, ignore_n=False) -> str:
