@@ -56,8 +56,42 @@ def get_mutation_name(diff_obj, shift_by=0) -> str:
     return ''
 
 
-def get_all_mutations(ref_gene: GeneDetails, gene: GeneDetails, upper_bound_range=(8, 256)) -> List[str]:
+def get_mutations_to_amino(gene: GeneDetails, differences: list) -> list:
+    def amino_pos(x): return (x - 1) // 3 + 1
+    def pos_in_group(x): return (x - 1) % 3
+    def get_group(x): return gene.sequence[(x - 1) * 3: x * 3]
+    mutations_per_group = {}
+    for d in differences:
+        group = amino_pos(d[1])
+        if group not in mutations_per_group:
+            mutations_per_group[group] = []
+        mutations_per_group[group].append(d)
+    amino_mutations = []
+    for group, mutation_list in mutations_per_group.items():
+        has_del = False
+        original_group = get_group(group)
+        actual_group = original_group
+        original_amino = to_amino(original_group)
+        for m in mutation_list:
+            if m[0] == 'I':
+                amino_mutations.append(('I', group, m[2]))
+            elif m[0] == 'S':
+                p = pos_in_group(m[1])
+                actual_group = actual_group[:p] + m[3] + actual_group[p + 1:]
+            elif m[0] == 'D':
+                has_del = True
+        amino_m = ('D', group, original_amino) if has_del else ('S', group, original_amino, to_amino(actual_group))
+        if amino_m[0] != 'S' or amino_m[2] != amino_m[3]:
+            amino_mutations.append(amino_m)
+    amino_mutations.sort(key=lambda am: (am[1], 0 if am[0] == 'I' else 1))
+    return amino_mutations
+
+
+def get_all_mutations(ref_gene: GeneDetails, gene: GeneDetails, convert_to_amino=False,
+                      upper_bound_range=(8, 256)) -> List[str]:
     differences = get_list_of_differences_adaptive(ref_gene.sequence, gene.sequence, upper_bound_range, True)
+    if convert_to_amino:
+        return [get_mutation_name(d) for d in get_mutations_to_amino(ref_gene, differences)]
     return [get_mutation_name(d, ref_gene.start - 1) for d in differences]
 
 

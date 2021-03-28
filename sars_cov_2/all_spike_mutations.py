@@ -8,7 +8,8 @@ from util.gene_utils import GeneDetails, get_all_mutations
 def get_all_spike_mutations(ref_spike: GeneDetails, input_file: str):
     for header, seq in read_sequences(input_file):
         spike = extract_spike(seq)
-        mutations = None if spike is None or len(spike) > len(ref_spike) + 100 else get_all_mutations(ref_spike, spike)
+        mutations = None if spike is None or len(spike) > len(ref_spike) + 100 else get_all_mutations(ref_spike, spike,
+                                                                                                      True)
         yield header, mutations
 
 

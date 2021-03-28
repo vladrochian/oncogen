@@ -4,5 +4,6 @@ venv
 **/*.fasta
 **/data/*.*
 
+sars_cov_2/data/mutation-stats
 !sars_cov_2/data/reference-full.fasta
 !sars_cov_2/data/reference-spike.fasta
