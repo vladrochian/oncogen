@@ -7,54 +7,57 @@ from util.gene_utils import GenePattern, GeneDetails, get_genes, get_gene
 
 def get_sars_cov_2_gene_patterns():
     return {
-        'orf1ab': GenePattern('ATGGAGAGC', 'AACAACTAA', 200),
-        'spike': GenePattern('ATGTTTGT', 'ACACATAA', 21400),
-        'orf3a': GenePattern('ATGGATTTG', 'CCTTTGTAA', 25300),
-        'E': GenePattern('ATGTACTCA', 'CTGGTCTAA', 26200),
-        'M': GenePattern('ATGGCAGAT', 'GTACAGTAA', 26500),
-        'orf6': GenePattern('ATGTTTCAT', 'ATTGATTAA', 27150),
-        'orf7a': GenePattern('ATGAAAATT', 'ACAGAATGA', 27300),
-        'orf7b': GenePattern('ATGATTGAA', 'CACGCCTAA', 27700),
-        'orf8': GenePattern('ATGAAATTT', 'TTCATCTAA', 27800),
-        'N': GenePattern('ATGTCTGAT', 'CAGGCCTAA', 28200),
-        'orf10': GenePattern('ATGGGCTAT', 'CTCACATAG', 29500)
+        'orf1ab': GenePattern('ATGGAGAGC', 'AACAACTAA', 200, 21290),
+        'spike': GenePattern('ATGTTTGT', 'ACACATAA', 21400, 3822),
+        'orf3a': GenePattern('ATGGATTTG', 'CCTTTGTAA', 25300, 828),
+        'E': GenePattern('ATGTACTCA', 'CTGGTCTAA', 26200, 228),
+        'M': GenePattern('ATGGCAGAT', 'GTACAGTAA', 26500, 669),
+        'orf6': GenePattern('ATGTTTCAT', 'ATTGATTAA', 27150, 186),
+        'orf7a': GenePattern('ATGAAAATT', 'ACAGAATGA', 27300, 366),
+        'orf7b': GenePattern('ATGATTGAA', 'CACGCCTAA', 27700, 132),
+        'orf8': GenePattern('ATGAAATTT', 'TTCATCTAA', 27800, 366),
+        'N': GenePattern('ATGTCTGAT', 'CAGGCCTAA', 28200, 1260),
+        'orf10': GenePattern('ATGGGCTAT', 'CTCACATAG', 29500, 117)
     }
 
 
-def get_sars_cov_2_genes(seq: str) -> Dict[str, GeneDetails]:
-    return get_genes(seq, get_sars_cov_2_gene_patterns())
+def get_sars_cov_2_genes(seq: str, force_by_length=False) -> Dict[str, GeneDetails]:
+    return get_genes(seq, get_sars_cov_2_gene_patterns(), force_by_length)
 
 
-def extract_spike(seq: str) -> Optional[GeneDetails]:
+def extract_spike(seq: str, force_by_length=False) -> Optional[GeneDetails]:
     """
     Extract spike protein gene from full sequence.
 
     :param seq: sequence of nucleotides
+    :param force_by_length: if end pattern not found, try matching by length
     :return: spike as a gene object
     """
-    return get_gene(seq, get_sars_cov_2_gene_patterns(), 'spike')
+    return get_gene(seq, get_sars_cov_2_gene_patterns(), 'spike', force_by_length)
 
 
-def extract_spike_seq(seq: str) -> Optional[str]:
+def extract_spike_seq(seq: str, force_by_length=False) -> Optional[str]:
     """
     Extract spike protein sequence from full sequence.
 
     :param seq: sequence of nucleotides
+    :param force_by_length: if end pattern not found, try matching by length
     :return: spike as a sequence of nucleotides
     """
-    spike = extract_spike(seq)
+    spike = extract_spike(seq, force_by_length)
     return None if spike is None else spike.sequence
 
 
-def extract_spike_as_amino(seq: str) -> Optional[str]:
+def extract_spike_as_amino(seq: str, force_by_length=False) -> Optional[str]:
     """
     Extract spike protein from full sequence and transform it into amino sequence.
 
     :param seq: sequence of nucleotides
+    :param force_by_length: if end pattern not found, try matching by length
     :return: spike as a sequence of amino acids
     """
-    spike_seq = extract_spike_seq(seq)
-    return None if spike_seq is None else to_amino(extract_spike_seq(seq))
+    spike_seq = extract_spike_seq(seq, force_by_length)
+    return None if spike_seq is None else to_amino(spike_seq)
 
 
 def get_reference_full() -> str:

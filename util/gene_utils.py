@@ -17,30 +17,36 @@ class GeneDetails:
 
 
 class GenePattern:
-    def __init__(self, prefix: str, suffix: str, search_after=1):
+    def __init__(self, prefix: str, suffix: str, search_after=1, default_length=None):
         self.prefix = prefix
         self.suffix = suffix
         self.search_after = search_after
+        self.default_length = default_length
 
-    def extract_from(self, seq: str) -> Optional[GeneDetails]:
+    def extract_from(self, seq: str, force_by_length=False) -> Optional[GeneDetails]:
         start_pos = seq.find(self.prefix, self.search_after - 1)
         if start_pos == -1:
             return None
         suffix = seq[start_pos:]
         end_pos = suffix.find(self.suffix)
+        if self.default_length is not None and end_pos + len(self.suffix) > self.default_length + 100:
+            end_pos = -1
         if end_pos == -1:
-            return None
+            if not force_by_length or self.default_length is None:
+                return None
+            end_pos = start_pos + self.default_length + 50
         return GeneDetails(start_pos + 1, suffix[:end_pos + len(self.suffix)])
 
 
-def get_gene(seq: str, patterns: Dict[str, GenePattern], gene_name: str) -> Optional[GeneDetails]:
-    return patterns[gene_name].extract_from(seq) if gene_name in patterns else None
+def get_gene(seq: str, patterns: Dict[str, GenePattern], gene_name: str,
+             force_by_length=False) -> Optional[GeneDetails]:
+    return patterns[gene_name].extract_from(seq, force_by_length) if gene_name in patterns else None
 
 
-def get_genes(seq: str, patterns: Dict[str, GenePattern]) -> Dict[str, GeneDetails]:
+def get_genes(seq: str, patterns: Dict[str, GenePattern], force_by_length=False) -> Dict[str, GeneDetails]:
     ans = {}
     for gene, pattern in patterns.items():
-        gene_seq = pattern.extract_from(seq)
+        gene_seq = pattern.extract_from(seq, force_by_length)
         if gene_seq is not None:
             ans[gene] = gene_seq
     return ans
@@ -89,7 +95,8 @@ def get_mutations_to_amino(gene: GeneDetails, differences: list) -> list:
 
 def get_all_mutations(ref_gene: GeneDetails, gene: GeneDetails, convert_to_amino=False,
                       upper_bound_range=(8, 256)) -> List[str]:
-    differences = get_list_of_differences_adaptive(ref_gene.sequence, gene.sequence, upper_bound_range, True)
+    differences = get_list_of_differences_adaptive(ref_gene.sequence, gene.sequence, upper_bound_range, True,
+                                                   ignore_end_insertions=True)
     if convert_to_amino:
         return [get_mutation_name(d) for d in get_mutations_to_amino(ref_gene, differences)]
     return [get_mutation_name(d, ref_gene.start - 1) for d in differences]

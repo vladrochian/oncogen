@@ -110,7 +110,7 @@ def generate_best_and_prev(s1: str, s2: str, ignore_n=False):
     return best, prev
 
 
-def get_differences_from_row_points(s1: str, s2: str, col: List[int], ignore_n=False):
+def get_differences_from_row_points(s1: str, s2: str, col: List[int], ignore_n=False, ignore_end_insertions=False):
     ans = []
     for i in range(1, len(s1) + 1):
         if col[i] == col[i - 1]:
@@ -120,10 +120,12 @@ def get_differences_from_row_points(s1: str, s2: str, col: List[int], ignore_n=F
                 ans.append(('I', i, s2[col[i - 1]: col[i] - 1]))
             if char_dist(s1[i - 1], s2[col[i] - 1], ignore_n) == 1:
                 ans.append(('S', i, s1[i - 1], s2[col[i] - 1]))
+    if not ignore_end_insertions and col[len(s1)] < len(s2):
+        ans.append(('I', len(s1) + 1, s2[len(s1):]))
     return ans
 
 
-def get_list_of_differences(s1: str, s2: str, ignore_n=False):
+def get_list_of_differences(s1: str, s2: str, ignore_n=False, ignore_end_insertions=False):
     best, prev = generate_best_and_prev(s1, s2, ignore_n)
     col = [0 for _ in range(len(s1) + 1)]
     x, y = len(s1), len(s2)
@@ -131,10 +133,10 @@ def get_list_of_differences(s1: str, s2: str, ignore_n=False):
         col[x] = y
         x, y = prev[x][y]
     col[0] = 0
-    return get_differences_from_row_points(s1, s2, col, ignore_n)
+    return get_differences_from_row_points(s1, s2, col, ignore_n, ignore_end_insertions)
 
 
-def get_list_of_differences_optimized(s1: str, s2: str, upper_bound: int, ignore_n=False):
+def get_list_of_differences_optimized(s1: str, s2: str, upper_bound: int, ignore_n=False, ignore_end_insertions=False):
     inf = 2 * upper_bound
     best = [[0 for _ in range(2 * upper_bound + 1)] for _ in range(2)]
     prev = [[(0, 0) for _ in range(2 * upper_bound + 1)] for _ in range(len(s1) + 1)]
@@ -171,18 +173,18 @@ def get_list_of_differences_optimized(s1: str, s2: str, upper_bound: int, ignore
         col[x] = y - upper_bound + x
         x, y = prev[x][y]
     col[0] = 0
-    return get_differences_from_row_points(s1, s2, col, ignore_n)
+    return get_differences_from_row_points(s1, s2, col, ignore_n, ignore_end_insertions)
 
 
 def get_list_of_differences_adaptive(s1: str, s2: str, upper_bound_range: Tuple[int, int], ignore_n=False,
-                                     try_brute=True):
+                                     try_brute=True, ignore_end_insertions=False):
     current_upper_bound = upper_bound_range[0]
     ans = None
     while ans is None and current_upper_bound <= upper_bound_range[1]:
-        ans = get_list_of_differences_optimized(s1, s2, current_upper_bound, ignore_n)
+        ans = get_list_of_differences_optimized(s1, s2, current_upper_bound, ignore_n, ignore_end_insertions)
         current_upper_bound *= 2
     if ans is None and try_brute:
-        ans = get_list_of_differences(s1, s2, ignore_n)
+        ans = get_list_of_differences(s1, s2, ignore_n, ignore_end_insertions)
     return ans
 
 
