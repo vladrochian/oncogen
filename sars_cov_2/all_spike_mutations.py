@@ -38,24 +38,34 @@ def get_matching_variant(mutations: List[str]) -> str:
 
 def print_all_spike_mutations(ref_spike: GeneDetails, input_file: str, output_file: str):
     variant_count = {}
+    mutation_list_count = {}
     unknown_count = 0
     with open(output_file, 'w') as f:
         for header, mutations in get_all_spike_mutations(ref_spike, input_file):
             if mutations:
                 variant = get_matching_variant(mutations)
-                text = ', '.join(mutations) + '\n' + variant
+                mutation_list = ', '.join(mutations)
+                text = mutation_list + '\n' + variant
                 variant_count[variant] = variant_count.get(variant, 0) + 1
+                mutation_list_count[mutation_list] = mutation_list_count.get(mutation_list, 0) + 1
             else:
                 text = '--- Manual investigation needed ---'
                 unknown_count += 1
             print(header + '\n' + text + '\n')
             f.write(header + '\n' + text + '\n\n')
+
+    def desc_by_value(item): return -item[1]
     variant_count_list = [item for item in variant_count.items()]
-    variant_count_list.sort(key=lambda item: -item[1])
+    variant_count_list.sort(key=desc_by_value)
+    mutation_list_count_list = [item for item in mutation_list_count.items()]
+    mutation_list_count_list.sort(key=desc_by_value)
     print('Found following variants:')
     for variant in variant_count_list:
         print('{}: {} sequence(s)'.format(variant[0], variant[1]))
-    print('{} unreadable spike(s)'.format(unknown_count))
+    print('\nFound following mutation sets:')
+    for mutation_list in mutation_list_count_list:
+        print('{}: {} sequence(s)'.format(mutation_list[0], mutation_list[1]))
+    print('\n{} unreadable spike(s)'.format(unknown_count))
 
 
 if __name__ == '__main__':
