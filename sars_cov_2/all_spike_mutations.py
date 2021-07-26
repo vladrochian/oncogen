@@ -6,6 +6,8 @@ from util.fasta_utils import read_sequences
 from util.gene_utils import GeneDetails, get_all_mutations
 
 variant_patterns = [
+    ('B.1.427/B.1.429 (Epsilon Variant)', ['S13I', 'W152C', 'L452R', 'D614G']),
+    ('B.1.617.2 (Delta Variant)', ['T19R', 'T478K', 'P681R', 'D950N']),
     ('B.1.351 (South Africa Variant)', ['K417N', 'E484K', 'N501Y']),
     ('P.1 (Brazil Variant)', ['K417T', 'E484K', 'N501Y']),
     ('B.1.1.7 (UK Variant)', ['N501Y', 'P681H']),
@@ -36,19 +38,35 @@ def get_matching_variant(mutations: List[str]) -> str:
     return ''
 
 
+def mutation_position(mutation: str) -> int:
+    x = 0
+    for c in mutation:
+        if c.isdigit():
+            x = x * 10 + int(c)
+    return x
+
+
+def filter_rbd_mutations(mutations: List[str]) -> List[str]:
+    return list(filter(lambda m: 333 <= mutation_position(m) <= 527, mutations))
+
+
 def print_all_spike_mutations(ref_spike: GeneDetails, input_file: str, output_file: str):
     variant_count = {}
+    rbd_mutation_count = {}
     unknown_count = 0
     with open(output_file, 'w') as f:
         for header, mutations in get_all_spike_mutations(ref_spike, input_file):
             if mutations:
+                rbd_mutations = filter_rbd_mutations(mutations)
                 variant = get_matching_variant(mutations)
                 mutation_list = ', '.join(mutations)
-                text = mutation_list + '\n' + variant
+                rbd_mutation_list = ', '.join(rbd_mutations)
+                text = '{}\nRBD: {}\n{}'.format(mutation_list, rbd_mutation_list, variant)
                 if variant not in variant_count:
                     variant_count[variant] = {}
                 variant_count_dict = variant_count[variant]
                 variant_count_dict[mutation_list] = variant_count_dict.get(mutation_list, 0) + 1
+                rbd_mutation_count[rbd_mutation_list] = rbd_mutation_count.get(rbd_mutation_list, 0) + 1
             else:
                 text = '--- Manual investigation needed ---'
                 unknown_count += 1
@@ -71,6 +89,11 @@ def print_all_spike_mutations(ref_spike: GeneDetails, input_file: str, output_fi
         for mutation_list, count in variant_dict_list:
             print('  - {}, {} sequence(s)'.format(mutation_list, count))
     print('\n{} unreadable spike(s)'.format(unknown_count))
+    print('\n\nFound following RBD mutation combinations:')
+    rbd_count_list = [item for item in rbd_mutation_count.items()]
+    rbd_count_list.sort(key=lambda item: -item[1])
+    for mutation_list, count in rbd_count_list:
+        print('{}: {} sequence(s)'.format(mutation_list, count))
 
 
 if __name__ == '__main__':
