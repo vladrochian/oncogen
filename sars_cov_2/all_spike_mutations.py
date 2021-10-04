@@ -7,7 +7,7 @@ from util.gene_utils import GeneDetails, get_all_mutations
 
 variant_patterns = [
     ('B.1.427/B.1.429 (Epsilon Variant)', ['S13I', 'W152C', 'L452R', 'D614G']),
-    ('B.1.617.2 (Delta Variant)', ['T19R', 'T478K', 'P681R', 'D950N']),
+    ('B.1.617.2 (Delta Variant)', ['T19R', 'T478K', 'P681R']),
     ('B.1.351 (South Africa Variant)', ['K417N', 'E484K', 'N501Y']),
     ('P.1 (Brazil Variant)', ['K417T', 'E484K', 'N501Y']),
     ('B.1.1.7 (UK Variant)', ['N501Y', 'P681H']),
