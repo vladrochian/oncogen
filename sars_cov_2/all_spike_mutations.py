@@ -1,5 +1,5 @@
 import sys
-from typing import List
+from typing import List, Dict
 
 from sars_cov_2.structure import get_reference_spike, extract_spike
 from util.fasta_utils import read_sequences
@@ -22,6 +22,15 @@ def get_all_spike_mutations(ref_spike: GeneDetails, input_file: str):
         mutations = None if spike is None or len(spike) > len(ref_spike) + 120 else get_all_mutations(ref_spike, spike,
                                                                                                       True)
         yield header, mutations
+
+
+def get_spike_mutation_frequency(ref_spike: GeneDetails, input_file: str) -> Dict[str, int]:
+    freq: Dict[str, int] = {}
+    for _, mutations in get_all_spike_mutations(ref_spike, input_file):
+        if mutations is not None:
+            for mutation in mutations:
+                freq[mutation] = freq.get(mutation, 0) + 1
+    return freq
 
 
 def matches_variant(variant_mutations: List[str], mutations: List[str]) -> bool:

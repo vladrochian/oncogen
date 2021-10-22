@@ -62,6 +62,14 @@ def get_mutation_name(diff_obj, shift_by=0) -> str:
     return ''
 
 
+def get_mutation_position(mutation: str) -> int:
+    if mutation.find('ins') != -1:
+        return int(mutation[:mutation.find('_')])
+    if mutation.find('del') != -1:
+        return int(mutation[1:mutation.find('del')])
+    return int(mutation[1:-1])
+
+
 def get_mutations_to_amino(gene: GeneDetails, differences: list) -> list:
     def amino_pos(x): return (x - 1) // 3 + 1
     def pos_in_group(x): return (x - 1) % 3
