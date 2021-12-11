@@ -1,3 +1,4 @@
+from functools import cache
 from typing import List, Tuple
 
 
@@ -25,6 +26,7 @@ def at(ls: list, index: int, default):
         return default
 
 
+@cache
 def lev_distance(s1: str, s2: str, ignore_n=False) -> int:
     """
     Levenshtein distance between two sequences.
@@ -49,6 +51,7 @@ def lev_distance(s1: str, s2: str, ignore_n=False) -> int:
     return best[len(s1) & 1][len(s2)]
 
 
+@cache
 def lev_distance_optimized(s1: str, s2: str, upper_bound: int, ignore_n=False) -> int:
     """
     Levenshtein distance between two sequences, optimized.
@@ -89,6 +92,7 @@ def lev_distance_optimized(s1: str, s2: str, upper_bound: int, ignore_n=False) -
     return ans if ans <= upper_bound else -1
 
 
+@cache
 def generate_best_and_prev(s1: str, s2: str, ignore_n=False):
     best = [[0 for _ in range(len(s2) + 1)] for _ in range(len(s1) + 1)]
     prev = [[(0, 0) for _ in range(len(s2) + 1)] for _ in range(len(s1) + 1)]
@@ -136,6 +140,7 @@ def get_list_of_differences(s1: str, s2: str, ignore_n=False, ignore_end_inserti
     return get_differences_from_row_points(s1, s2, col, ignore_n, ignore_end_insertions)
 
 
+@cache
 def get_list_of_differences_optimized(s1: str, s2: str, upper_bound: int, ignore_n=False, ignore_end_insertions=False):
     inf = 2 * upper_bound
     best = [[0 for _ in range(2 * upper_bound + 1)] for _ in range(2)]

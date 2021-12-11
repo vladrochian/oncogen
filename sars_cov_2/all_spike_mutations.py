@@ -6,6 +6,7 @@ from util.fasta_utils import read_sequences
 from util.gene_utils import GeneDetails, get_all_mutations
 
 variant_patterns = [
+    ('B.1.1.529 (Omicron Variant)', ['T95I', 'G339D', 'S371L', 'S373P', 'S375F', 'K417N', 'N440K', 'G446S', 'E484A', 'N501Y']),
     ('B.1.427/B.1.429 (Epsilon Variant)', ['S13I', 'W152C', 'L452R', 'D614G']),
     ('B.1.617.2 (Delta Variant)', ['T19R', 'T478K', 'P681R']),
     ('B.1.351 (South Africa Variant)', ['K417N', 'E484K', 'N501Y']),
@@ -59,12 +60,16 @@ def filter_rbd_mutations(mutations: List[str]) -> List[str]:
     return list(filter(lambda m: 333 <= mutation_position(m) <= 527, mutations))
 
 
-def print_all_spike_mutations(ref_spike: GeneDetails, input_file: str, output_file: str):
+def print_all_spike_mutations(ref_spike: GeneDetails, input_file: str, output_file: str, print_to_console=False):
     variant_count = {}
     rbd_mutation_count = {}
     unknown_count = 0
+    seq_count = 0
     with open(output_file, 'w') as f:
         for header, mutations in get_all_spike_mutations(ref_spike, input_file):
+            seq_count += 1
+            if not print_to_console and seq_count % 100 == 0:
+                print('{} sequences'.format(seq_count))
             if mutations:
                 rbd_mutations = filter_rbd_mutations(mutations)
                 variant = get_matching_variant(mutations)
@@ -79,7 +84,8 @@ def print_all_spike_mutations(ref_spike: GeneDetails, input_file: str, output_fi
             else:
                 text = '--- Manual investigation needed ---'
                 unknown_count += 1
-            print(header + '\n' + text + '\n')
+            if print_to_console:
+                print(header + '\n' + text + '\n')
             f.write(header + '\n' + text + '\n\n')
 
     def variant_count_all(key):
